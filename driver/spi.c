@@ -325,7 +325,8 @@ os_event_t * spiQueue;
 //init the two intr line of slave
 //gpio0: wr_ready ,and  
 //gpio2: rd_ready , controlled by slave
-void ICACHE_FLASH_ATTR
+
+/*void ICACHE_FLASH_ATTR
     gpio_init()
 {
 
@@ -335,7 +336,7 @@ void ICACHE_FLASH_ATTR
     	GPIO_OUTPUT_SET(0, 1);
     	GPIO_OUTPUT_SET(2, 0);
 	//GPIO_OUTPUT_SET(4, 1);
-}
+}*/
 
 
 
