@@ -40,41 +40,21 @@ void send_spi_char(void)
   msg[8]=(char)c;
   uart0_tx_buffer(msg, sizeof(msg));
   
-  spi_mast_byte_write(HSPI,c);
+  spi_tx8(HSPI, c);
   c++;
   if (c > 'Z')
 	c = '0';
 }
 
-
-void interupt_test() {
-   ETS_GPIO_INTR_DISABLE(); // Disable gpio interrupts
-   //wdt_feed();
-
-   uint32 gpio_status;
-   gpio_status = GPIO_REG_READ(GPIO_STATUS_ADDRESS);
-   //clear interrupt status
-   GPIO_REG_WRITE(GPIO_STATUS_W1TC_ADDRESS, gpio_status);
-
-   //ets_uart_printf("GPIO Interrupt!\r\n");
-   send_spi_char();
-
-   ETS_GPIO_INTR_ENABLE(); // Enable gpio interrupts
-}
-
-void ICACHE_FLASH_ATTR gpio_init() {
-   ETS_GPIO_INTR_DISABLE(); // Disable gpio interrupts
-   ETS_GPIO_INTR_ATTACH(interupt_test, 2); // GPIO12 interrupt handler
-   PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO2_U, FUNC_GPIO2); // Set GPIO12 function
-   gpio_output_set(0, 0, 0, GPIO_ID_PIN(2)); // Set GPIO12 as input
-   GPIO_REG_WRITE(GPIO_STATUS_W1TC_ADDRESS, BIT(2)); // Clear GPIO12 status
-   gpio_pin_intr_state_set(GPIO_ID_PIN(2), 1); // Interrupt on any GPIO12 edge
-   ETS_GPIO_INTR_ENABLE(); // Enable gpio interrupts
-   //wdt_feed();
-}
-
 void do_nothing()
 {
+  static char c='0';
+  
+  spi_tx8(HSPI, c);
+  c++;
+  if (c > 'Z')
+	c = '0';
+
   return;	
 }
 
@@ -95,11 +75,8 @@ void user_init(void)
   os_sprintf(buffer, "setting timers\0", result);
   PRINT_MSG
 
-  gpio_init();
-  
-  interupt_test();
-
+ 
   os_timer_disarm(&dbgTimer);
-  os_timer_setfn(&dbgTimer, (os_timer_func_t *)do_nothing, NULL);
+  os_timer_setfn(&dbgTimer, (os_timer_func_t *)send_spi_char, NULL);
   os_timer_arm(&dbgTimer, 1000, 1);
 }
