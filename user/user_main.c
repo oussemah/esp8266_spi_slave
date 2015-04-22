@@ -36,14 +36,25 @@ void send_spi_char(void)
 {
   static uint8_t c='0';
   
-  char msg[] = "sending x \n\r";
-  msg[8]=(char)c;
-  uart0_tx_buffer(msg, sizeof(msg));
+  char snd[] = "sending x \n\r";
+  char rcp[] = "xxxxxxxxxx\r\n";
+  snd[8]=(char)c;
+  uart0_tx_buffer(snd, sizeof(snd));
   
-  spi_tx8(HSPI, c);
+  spi_send_string(HSPI, snd, sizeof(snd));
+  
+  spi_read_string(HSPI, rcp, sizeof(snd) - 5);
+  
+  
+  //rcp[4] = (char) spi_tx_rx8(HSPI, c);
+  
+  uart0_tx_buffer(rcp, sizeof(rcp));
+  
   c++;
-  if (c > 'Z')
+  if (c > 'Z') {
+	rcp[4] = (char) spi_tx_rx8(HSPI, '\0');
 	c = '0';
+  }
 }
 
 void do_nothing()
@@ -78,5 +89,5 @@ void user_init(void)
  
   os_timer_disarm(&dbgTimer);
   os_timer_setfn(&dbgTimer, (os_timer_func_t *)send_spi_char, NULL);
-  os_timer_arm(&dbgTimer, 1000, 1);
+  os_timer_arm(&dbgTimer, 200, 1);
 }

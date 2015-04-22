@@ -48,6 +48,7 @@ void spi_init_gpio(uint8 spi_no, uint8 sysclk_as_spiclk);
 void spi_clock(uint8 spi_no, uint16 prediv, uint8 cntdiv);
 void spi_tx_byte_order(uint8 spi_no, uint8 byte_order);
 void spi_rx_byte_order(uint8 spi_no, uint8 byte_order);
+
 uint32 spi_transaction(uint8 spi_no, uint8 cmd_bits, uint16 cmd_data, uint32 addr_bits, uint32 addr_data, uint32 dout_bits, uint32 dout_data, uint32 din_bits, uint32 dummy_bits);
 //Expansion Macros
 #define spi_busy(spi_no) READ_PERI_REG(SPI_CMD(spi_no))&SPI_USR
@@ -59,4 +60,8 @@ uint32 spi_transaction(uint8 spi_no, uint8 cmd_bits, uint16 cmd_data, uint32 add
 #define spi_rx8(spi_no) spi_transaction(spi_no, 0, 0, 0, 0, 0, 0, 8, 0)
 #define spi_rx16(spi_no) spi_transaction(spi_no, 0, 0, 0, 0, 0, 0, 16, 0)
 #define spi_rx32(spi_no) spi_transaction(spi_no, 0, 0, 0, 0, 0, 0, 32, 0)
+#define spi_tx_rx8(spi_no, data) spi_transaction(spi_no, 0, 0, 0, 0, 8, (uint32) data, 8, 0)
+
+#define spi_send_string(spi_no, buffer, size) { int i; for (i =0; i < size; i++) { spi_tx8(spi_no, buffer[i]);} }
+#define spi_read_string(spi_no, buffer, size) { int i; for (i =0; i < size; i++) { buffer[i] = (uint8_t)spi_rx8(spi_no);};buffer[size]='\0';}
 #endif
